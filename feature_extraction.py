@@ -1,6 +1,10 @@
 import pickle
 import tensorflow as tf
+
 # TODO: import Keras layers you need here
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Flatten, Dropout, Input
+import numpy as np
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -46,8 +50,28 @@ def main(_):
     # the dataset
     # 10 for cifar10
     # 43 for traffic
+    num_classes = len(np.unique(y_train))
+    model = Sequential()
 
-    # TODO: train your model here
+    # feature extraction using already trained model, thus
+    # only needs to tune and add the last few layers
+    model.add(Flatten(input_shape=(X_train[0].shape)))
+    model.add(Dense(120, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(num_classes, activation='softmax'))
+
+    # TODO: train your model here. y_train is not one-hot-coded
+    # so use "sparse-categorical_crossentropy" instead
+    model.compile(loss='sparse_categorical_crossentropy',
+              optimizer='adam',
+              metrics=['acc'])
+
+    history = model.fit(X_train, y_train,
+                        batch_size=128,
+                        epochs=10,
+                        verbose=2,
+                        validation_data=(X_val, y_val),
+                        shuffle=True)
 
 
 # parses flags and calls the `main` function above
